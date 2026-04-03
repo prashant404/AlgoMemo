@@ -1,0 +1,41 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Deep Midnight Slate Background */
+    --background: 222 47% 11%;
+    --foreground: 210 40% 98%;
+
+    /* Slightly lighter slate for cards */
+    --card: 223 47% 14%;
+    --card-foreground: 210 40% 98%;
+
+    /* Muted elements */
+    --muted: 217 32% 17%;
+    --muted-foreground: 215 20% 65%;
+
+    /* Subtle borders */
+    --border: 217 32% 17%;
+
+    /* Electric Violet for primary actions */
+    --brand: 262 83% 58%;
+    --brand-foreground: 210 40% 98%;
+
+    /* Cyan secondary accent for highlights */
+    --accent: 189 94% 43%;
+    --accent-foreground: 0 0% 100%;
+
+    --radius: 0.75rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased selection:bg-brand/30 selection:text-brand-foreground;
+  }
+}

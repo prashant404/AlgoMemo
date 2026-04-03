@@ -6,7 +6,10 @@ const mongoose = require('mongoose');
 dotenv.config();
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: ['http://localhost:5173', 'https://your-app-name.vercel.app'], // Add your Vercel link later
+  credentials: true
+}));
 app.use(express.json());
 
 // Optimized Connection for Direct Node Strings (Bypasses SRV Blocks)

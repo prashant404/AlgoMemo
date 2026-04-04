@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import api from '../api/axios';
 import { QUESTION_BANK } from '../data/questions';
+import WeaknessDetector from '../components/WeaknessDetector';
 
 const TOPIC_CONFIG = [
   { id: 'arrays', name: 'Arrays & Hashing', total: QUESTION_BANK['arrays']?.length || 0, icon: LayoutList, color: 'text-blue-400' },
@@ -37,6 +38,7 @@ const TOPIC_CONFIG = [
 export default function Dashboard() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('all');
+  const [allNotes, setAllNotes] = useState([]); // ⚡ Keep full notes for WeaknessDetector
   
   const [user] = useState(() => {
     const storedUser = localStorage.getItem('user');
@@ -55,6 +57,7 @@ export default function Dashboard() {
       try {
         const res = await api.get('/notes');
         const fetchedNotes = res.data;
+        setAllNotes(fetchedNotes); // ⚡ Store notes for weakness analysis
 
         const today = new Date();
         const dueNotes = fetchedNotes.filter(note => new Date(note.nextRevisionDate) <= today);
@@ -85,12 +88,14 @@ export default function Dashboard() {
 
   return (
     <div className="relative min-h-[calc(100vh-4rem)] w-full pb-12 overflow-hidden bg-background text-foreground">
+      {/* Background Decor */}
       <div className="pointer-events-none absolute inset-0 z-0 flex justify-center overflow-hidden">
         <div className="absolute -left-[10%] top-[-10%] h-[500px] w-[500px] rounded-full bg-brand/20 blur-[100px]"></div>
         <div className="absolute right-[-5%] top-[20%] h-[400px] w-[400px] rounded-full bg-accent/15 blur-[120px]"></div>
       </div>
 
       <main className="container relative z-10 mx-auto max-w-7xl px-4 pt-10 md:px-8">
+        {/* Header Section */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
           <div>
             <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl mb-2">
@@ -128,6 +133,10 @@ export default function Dashboard() {
           </div>
         </div>
 
+        {/* ⚡ NEW: WEAKNESS DETECTOR COMPONENT */}
+        <WeaknessDetector notes={allNotes} />
+
+        {/* Tab Selection & Playlists */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border/50 pb-4 mb-8">
           <div className="flex items-center gap-2">
             <button onClick={() => setActiveTab('all')} className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'all' ? 'bg-brand/20 text-brand' : 'text-muted-foreground hover:text-foreground'}`}>
@@ -149,7 +158,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* FIX: Render Grid OR Empty State */}
+        {/* Grid OR Empty State */}
         {displayedTopics.length === 0 ? (
           <div className="text-center py-20 border border-dashed border-white/10 rounded-3xl bg-card/20 backdrop-blur-sm animate-in fade-in duration-500">
             <div className="mx-auto h-16 w-16 bg-emerald-500/10 text-emerald-400 rounded-full flex items-center justify-center mb-4">
@@ -157,13 +166,13 @@ export default function Dashboard() {
             </div>
             <h2 className="text-2xl font-bold mb-2 text-foreground">You're all caught up!</h2>
             <p className="text-muted-foreground max-w-sm mx-auto">
-              No topics are due for revision right now. Switch to "All Topics" to learn something new, or do a Mock Interview.
+              No topics are due for revision right now. Switch to "All Topics" to learn something new.
             </p>
           </div>
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {displayedTopics.map((topic) => {
-              const isComplete = topic.solved >= topic.total && topic.total > 0;
+              const isComplete = topic.total > 0 && topic.solved >= topic.total;
               const progressPercentage = topic.total > 0 ? Math.min(Math.round((topic.solved / topic.total) * 100), 100) : 0;
               const Icon = topic.icon;
 

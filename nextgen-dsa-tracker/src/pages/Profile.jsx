@@ -2,6 +2,9 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import { User, Settings, BarChart3, Target, Zap, Award, Save, Lock, ArrowLeft, ShieldAlert, LogOut, CheckCircle2 } from "lucide-react";
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer, Pie, PieChart, Cell, Tooltip } from "recharts";
+import ActivityCalendar from "react-activity-calendar"; // ⚡ NEW IMPORT
+import { subDays, format } from "date-fns"; // ⚡ NEW IMPORT
+
 import api from "../api/axios";
 import { QUESTION_BANK } from "../data/questions";
 import { getAvatarUrl } from "../utils/avatar";
@@ -29,9 +32,11 @@ export default function Profile() {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  const [stats, setStats] = useState({ radar: [], pie: [], total: 0, easy: 0, med: 0, hard: 0 });
+  // ⚡ Added heatmapData to stats state
+  const [stats, setStats] = useState({ radar: [], pie: [], total: 0, easy: 0, med: 0, hard: 0, heatmapData: [] });
   const [gameStats, setGameStats] = useState({ level: 1, title: "Pattern Solver", badges: [], solvedCount: 0 });
 
+  // ⚡ FIXED typo: AVATAR_OPTIONS.url instead of AVATAR_OPTIONS.url
   const [identityForm, setIdentityForm] = useState({ username: user?.username || "", avatar: user?.avatar || AVATAR_OPTIONS.url });
   const [passwordForm, setPasswordForm] = useState({ currentPassword: "", newPassword: "" });
   const [settingsMsg, setSettingsMsg] = useState({ type: "", text: "" });
@@ -50,6 +55,30 @@ export default function Profile() {
       const notes = notesRes.data;
       setGameStats(statsRes.data);
 
+      // --- ⚡ HEATMAP LOGIC START ---
+      const activityMap = {};
+      notes.forEach(note => {
+        // Fallback to today if note is missing a date
+        const dateStr = note.createdAt ? note.createdAt.split('T') : new Date().toISOString().split('T');
+        activityMap[dateStr] = (activityMap[dateStr] || 0) + 1;
+      });
+
+      // Generate the last 365 days
+      const heatmap = [];
+      for (let i = 365; i >= 0; i--) {
+        const date = format(subDays(new Date(), i), 'yyyy-MM-dd');
+        const count = activityMap[date] || 0;
+        
+        let level = 0;
+        if (count === 1) level = 1;
+        if (count === 2) level = 2;
+        if (count >= 3 && count <= 4) level = 3;
+        if (count >= 5) level = 4;
+
+        heatmap.push({ date, count, level });
+      }
+      // --- ⚡ HEATMAP LOGIC END ---
+
       const radarData = Object.keys(QUESTION_BANK).map(topicId => {
         const total = QUESTION_BANK[topicId]?.length || 1;
         const solved = notes.filter(n => n.topic === topicId).length;
@@ -66,7 +95,8 @@ export default function Profile() {
         radar: radarData,
         pie: [{ name: "Easy", value: diffs.Easy }, { name: "Medium", value: diffs.Medium }, { name: "Hard", value: diffs.Hard }].filter(d => d.value > 0),
         total: notes.length,
-        easy: diffs.Easy, med: diffs.Medium, hard: diffs.Hard
+        easy: diffs.Easy, med: diffs.Medium, hard: diffs.Hard,
+        heatmapData: heatmap // ⚡ Save to state
       });
     } catch (err) {
       console.error(err);
@@ -218,6 +248,26 @@ export default function Profile() {
                 <div className="lg:col-span-2 rounded-3xl border border-white/5 bg-card/40 shadow-xl overflow-hidden min-h-[400px]">
                   <div className="p-8 border-b border-white/5 bg-white/5"><h3 className="text-lg font-black uppercase tracking-widest">Achievements</h3></div>
                   <div className="p-2"><BadgeRenderer badges={gameStats.badges} totalSolved={stats.total} /></div>
+                </div>
+              </div>
+
+              {/* ⚡ NEW: NEURAL ACTIVITY HEATMAP */}
+              <div className="p-8 rounded-3xl border border-white/5 bg-card/40 shadow-xl overflow-x-auto">
+                <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
+                  <Zap size={20} className="text-brand" /> Neural Activity Sync
+                </h3>
+                <div className="min-w-[750px] flex justify-center bg-[#0f172a]/50 p-6 rounded-2xl border border-white/5">
+                  <ActivityCalendar 
+                    data={stats.heatmapData.length > 0 ? stats.heatmapData : [{ date: new Date().toISOString().split('T'), count: 0, level: 0 }]}
+                    theme={{
+                      dark: ['#1e293b', '#4f46e5', '#4338ca', '#3730a3', '#312e81']
+                    }}
+                    colorScheme="dark"
+                    labels={{
+                      totalCount: '{{count}} problems solved in the last year',
+                    }}
+                    showWeekdayLabels={true}
+                  />
                 </div>
               </div>
             </div>

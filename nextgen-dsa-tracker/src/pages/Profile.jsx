@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import { User, Settings, BarChart3, Target, Zap, Award, Save, Lock, ArrowLeft, ShieldAlert, LogOut, CheckCircle2 } from "lucide-react";
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer, Pie, PieChart, Cell, Tooltip } from "recharts";
-import ActivityCalendar from "react-activity-calendar"; // ⚡ NEW IMPORT
+import { ActivityCalendar } from "react-activity-calendar";
 import { subDays, format } from "date-fns"; // ⚡ NEW IMPORT
 
 import api from "../api/axios";

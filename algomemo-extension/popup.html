@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body { width: 320px; padding: 16px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0f172a; color: white; margin: 0; }
+    h2 { margin-top: 0; font-size: 18px; display: flex; align-items: center; gap: 8px; color: #a5b4fc; }
+    input, select, textarea { width: 100%; box-sizing: border-box; margin-bottom: 12px; padding: 10px; background: #1e293b; color: white; border: 1px solid #334155; border-radius: 8px; font-size: 14px; outline: none; }
+    input:focus, select:focus, textarea:focus { border-color: #6366f1; }
+    button { width: 100%; padding: 12px; background: #6366f1; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px; transition: 0.2s; }
+    button:hover { background: #4f46e5; }
+    .hidden { display: none !important; }
+    .label { font-size: 11px; font-weight: bold; color: #94a3b8; text-transform: uppercase; margin-bottom: 4px; display: block; letter-spacing: 1px; }
+  </style>
+</head>
+<body>
+  <h2>🧠 AlgoMemo Sync</h2>
+
+  <div id="settingsView" class="hidden">
+    <label class="label">AlgoMemo JWT Token</label>
+    <input type="password" id="tokenInput" placeholder="Paste your token here...">
+    <p style="font-size: 11px; color: #64748b; margin-top: -6px; margin-bottom: 12px;">Grab this from your browser's LocalStorage on your live app.</p>
+    <button id="saveTokenBtn">Link Account</button>
+  </div>
+
+  <div id="mainView" class="hidden">
+    <label class="label">Problem Title</label>
+    <input type="text" id="title" readonly>
+
+    <div style="display: flex; gap: 10px;">
+      <div style="flex: 1;">
+        <label class="label">Difficulty</label>
+        <input type="text" id="difficulty" readonly>
+      </div>
+      <div style="flex: 1;">
+        <label class="label">Topic</label>
+        <select id="topic">
+          <option value="arrays">Arrays</option>
+          <option value="two-pointers">Two Pointers</option>
+          <option value="sliding-window">Sliding Window</option>
+          <option value="binary-search">Binary Search</option>
+          <option value="trees">Trees</option>
+          <option value="dynamic-programming">DP</option>
+          <option value="graphs">Graphs</option>
+        </select>
+      </div>
+    </div>
+
+    <label class="label">The Trick (Micro-Journal)</label>
+    <textarea id="trick" rows="3" placeholder="What was the key intuition to solve this?"></textarea>
+
+    <button id="syncBtn">Send to Base 🚀</button>
+    <p id="status" style="font-size: 12px; text-align: center; margin-bottom: 0; font-weight: bold;"></p>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+{
+  "manifest_version": 3,
+  "name": "AlgoMemo LeetCode Sync",
+  "version": "1.0",
+  "description": "One-click sync LeetCode problems to your AlgoMemo tracker.",
+  "permissions": ["activeTab", "scripting", "storage"],
+  "host_permissions": [
+    "https://leetcode.com/problems/*",
+    "http://localhost:5000/*",
+    "https://*.onrender.com/*"
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  }
+}

@@ -7,27 +7,27 @@ dotenv.config();
 
 const app = express();
 
-// ⚡ REFINED CORS: Handles trailing slashes and multiple environments
 const allowedOrigins = [
   'http://localhost:5173',
   'https://algo-memo-kappa.vercel.app',
-  'https://algo-memo-kappa.vercel.app/' // Added trailing slash version
+  'https://algo-memo-kappa.vercel.app/'
 ];
 
-// Add the environment variable if it exists
 if (process.env.FRONTEND_URL) {
-  allowedOrigins.push(process.env.FRONTEND_URL.replace(/\/$/, "")); // Remove trailing slash if present
+  allowedOrigins.push(process.env.FRONTEND_URL.replace(/\/$/, ""));
 }
 
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl)
-    if (!origin) return callback(null, true);
+    // ⚡ VIP PASS: Allow mobile apps (no origin) AND Chrome Extensions
+    if (!origin || origin.startsWith('chrome-extension://')) {
+      return callback(null, true);
+    }
     
     if (allowedOrigins.indexOf(origin) !== -1 || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      console.log("CORS Blocked for origin:", origin); // Check Render logs for this!
+      console.log("CORS Blocked for origin:", origin); 
       callback(new Error('Not allowed by CORS'));
     }
   },
@@ -38,7 +38,7 @@ app.use(cors({
 
 app.use(express.json());
 
-// ⚡ PRO-TIP: Add a middleware to lowercase all emails automatically
+// Pro-tip: Lowercase emails automatically
 app.use((req, res, next) => {
   if (req.body && req.body.email) {
     req.body.email = req.body.email.toLowerCase().trim();

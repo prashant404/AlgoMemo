@@ -2,8 +2,8 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import { User, Settings, BarChart3, Target, Zap, Award, Save, Lock, ArrowLeft, ShieldAlert, LogOut, CheckCircle2 } from "lucide-react";
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer, Pie, PieChart, Cell, Tooltip } from "recharts";
-import { ActivityCalendar } from "react-activity-calendar";
-import { subDays, format } from "date-fns"; // ⚡ NEW IMPORT
+import { ActivityCalendar } from "react-activity-calendar"; // ⚡ FIXED: Added curly braces for v3 compatibility
+import { subDays, format } from "date-fns";
 
 import api from "../api/axios";
 import { QUESTION_BANK } from "../data/questions";
@@ -12,7 +12,6 @@ import BadgeRenderer from "../components/BadgeRenderer";
 
 const COLORS = ["#10b981", "#fbbf24", "#f43f5e"];
 
-// ✅ Avatar options outside component to avoid re-renders
 const AVATAR_OPTIONS = [
   { name: 'Robot',       url: 'https://api.dicebear.com/9.x/bottts/svg?seed=Felix&backgroundColor=0f172a' },
   { name: 'Adventurer',  url: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Lucky&backgroundColor=0f172a' },
@@ -32,11 +31,9 @@ export default function Profile() {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  // ⚡ Added heatmapData to stats state
   const [stats, setStats] = useState({ radar: [], pie: [], total: 0, easy: 0, med: 0, hard: 0, heatmapData: [] });
   const [gameStats, setGameStats] = useState({ level: 1, title: "Pattern Solver", badges: [], solvedCount: 0 });
 
-  // ⚡ FIXED typo: AVATAR_OPTIONS.url instead of AVATAR_OPTIONS.url
   const [identityForm, setIdentityForm] = useState({ username: user?.username || "", avatar: user?.avatar || AVATAR_OPTIONS.url });
   const [passwordForm, setPasswordForm] = useState({ currentPassword: "", newPassword: "" });
   const [settingsMsg, setSettingsMsg] = useState({ type: "", text: "" });
@@ -58,12 +55,10 @@ export default function Profile() {
       // --- ⚡ HEATMAP LOGIC START ---
       const activityMap = {};
       notes.forEach(note => {
-        // Fallback to today if note is missing a date
         const dateStr = note.createdAt ? note.createdAt.split('T') : new Date().toISOString().split('T');
         activityMap[dateStr] = (activityMap[dateStr] || 0) + 1;
       });
 
-      // Generate the last 365 days
       const heatmap = [];
       for (let i = 365; i >= 0; i--) {
         const date = format(subDays(new Date(), i), 'yyyy-MM-dd');
@@ -96,7 +91,7 @@ export default function Profile() {
         pie: [{ name: "Easy", value: diffs.Easy }, { name: "Medium", value: diffs.Medium }, { name: "Hard", value: diffs.Hard }].filter(d => d.value > 0),
         total: notes.length,
         easy: diffs.Easy, med: diffs.Medium, hard: diffs.Hard,
-        heatmapData: heatmap // ⚡ Save to state
+        heatmapData: heatmap
       });
     } catch (err) {
       console.error(err);
@@ -212,6 +207,8 @@ export default function Profile() {
           {/* OVERVIEW TAB */}
           {activeTab === "overview" && (
             <div className="space-y-6 animate-in fade-in duration-500">
+              
+              {/* 1. TOP HEADER */}
               <div className="relative overflow-hidden flex flex-col md:flex-row items-center gap-8 p-10 rounded-3xl border border-white/5 bg-card/40 backdrop-blur-xl shadow-2xl">
                 <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-brand/10 blur-[100px]"></div>
                 <div className="relative shrink-0">
@@ -230,7 +227,10 @@ export default function Profile() {
                 </div>
               </div>
 
+              {/* 2. MIDDLE GRID (Stats + Heatmap) */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                {/* Total Solved Card */}
                 <div className="lg:col-span-1 p-8 rounded-3xl border border-white/5 bg-card/40 shadow-xl flex flex-col justify-between">
                   <div>
                     <p className="text-xs font-black text-muted-foreground uppercase tracking-widest mb-1">Solved Total</p>
@@ -245,31 +245,36 @@ export default function Profile() {
                     ))}
                   </div>
                 </div>
-                <div className="lg:col-span-2 rounded-3xl border border-white/5 bg-card/40 shadow-xl overflow-hidden min-h-[400px]">
-                  <div className="p-8 border-b border-white/5 bg-white/5"><h3 className="text-lg font-black uppercase tracking-widest">Achievements</h3></div>
-                  <div className="p-2"><BadgeRenderer badges={gameStats.badges} totalSolved={stats.total} /></div>
+
+                {/* ⚡ Neural Activity Heatmap */}
+                <div className="lg:col-span-2 p-8 rounded-3xl border border-white/5 bg-card/40 shadow-xl overflow-x-auto flex flex-col justify-between">
+                  <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
+                    <Zap size={20} className="text-brand" /> Neural Activity Sync
+                  </h3>
+                  <div className="min-w-[750px] flex-1 flex items-center justify-center bg-[#0f172a]/50 p-6 rounded-2xl border border-white/5">
+                    <ActivityCalendar 
+                      data={stats.heatmapData.length > 0 ? stats.heatmapData : [{ date: new Date().toISOString().split('T'), count: 0, level: 0 }]}
+                      theme={{ dark: ['#1e293b', '#4f46e5', '#4338ca', '#3730a3', '#312e81'] }}
+                      colorScheme="dark"
+                      labels={{ totalCount: '{{count}} problems solved in the last year' }}
+                      showWeekdayLabels={true}
+                    />
+                  </div>
+                </div>
+
+              </div>
+
+              {/* 3. BOTTOM SECTION (Achievements) */}
+              <div className="rounded-3xl border border-white/5 bg-card/40 shadow-xl overflow-hidden">
+                <div className="p-8 border-b border-white/5 bg-white/5 flex items-center gap-2">
+                  <Award size={20} className="text-brand" />
+                  <h3 className="text-lg font-black uppercase tracking-widest">Achievements Overview</h3>
+                </div>
+                <div className="p-8">
+                  <BadgeRenderer badges={gameStats.badges} totalSolved={stats.total} />
                 </div>
               </div>
 
-              {/* ⚡ NEW: NEURAL ACTIVITY HEATMAP */}
-              <div className="p-8 rounded-3xl border border-white/5 bg-card/40 shadow-xl overflow-x-auto">
-                <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
-                  <Zap size={20} className="text-brand" /> Neural Activity Sync
-                </h3>
-                <div className="min-w-[750px] flex justify-center bg-[#0f172a]/50 p-6 rounded-2xl border border-white/5">
-                  <ActivityCalendar 
-                    data={stats.heatmapData.length > 0 ? stats.heatmapData : [{ date: new Date().toISOString().split('T'), count: 0, level: 0 }]}
-                    theme={{
-                      dark: ['#1e293b', '#4f46e5', '#4338ca', '#3730a3', '#312e81']
-                    }}
-                    colorScheme="dark"
-                    labels={{
-                      totalCount: '{{count}} problems solved in the last year',
-                    }}
-                    showWeekdayLabels={true}
-                  />
-                </div>
-              </div>
             </div>
           )}
 
@@ -279,7 +284,6 @@ export default function Profile() {
               <h1 className="text-3xl font-bold mb-6">Progress & Analytics</h1>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 
-                {/* ⚡ RADAR CHART FIX */}
                 <div className="p-8 rounded-3xl border border-white/5 bg-card/40 shadow-xl">
                   <h2 className="text-xl font-bold mb-6 flex items-center gap-2"><Target size={20} className="text-brand" /> Mastery Radar</h2>
                   <div className="h-[350px] w-full">
@@ -294,7 +298,6 @@ export default function Profile() {
                   </div>
                 </div>
 
-                {/* ⚡ PIE CHART FIX */}
                 <div className="p-8 rounded-3xl border border-white/5 bg-card/40 shadow-xl">
                   <h2 className="text-xl font-bold mb-6 flex items-center gap-2"><Zap size={20} className="text-amber-400" /> Confidence Mix</h2>
                   <div className="h-[350px] flex flex-col items-center justify-center">
@@ -330,14 +333,12 @@ export default function Profile() {
                 </div>
               )}
 
-              {/* Identity Form */}
               <div className="p-8 rounded-3xl border border-white/5 bg-card/40 shadow-xl">
                 <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
                   <User size={20} className="text-brand" /> Profile Identity
                 </h2>
                 <form onSubmit={handleUpdateIdentity} className="space-y-6">
                   
-                  {/* Avatar Preview */}
                   <div className="flex items-center gap-6">
                     <div className="h-20 w-20 rounded-2xl bg-slate-800 border-2 border-white/10 overflow-hidden shadow-xl shrink-0">
                       <img
@@ -353,7 +354,6 @@ export default function Profile() {
                     </div>
                   </div>
 
-                  {/* ✅ Avatar Grid Chooser */}
                   <div className="space-y-3">
                     <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Choose Avatar</label>
                     <div className="grid grid-cols-4 gap-3">
@@ -383,7 +383,6 @@ export default function Profile() {
                     </div>
                   </div>
 
-                  {/* Username */}
                   <div className="space-y-2">
                     <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Username</label>
                     <input
@@ -401,7 +400,6 @@ export default function Profile() {
                 </form>
               </div>
 
-              {/* Password Form */}
               <div className="p-8 rounded-3xl border border-white/5 bg-card/40 shadow-xl">
                 <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
                   <Lock size={20} className="text-brand" /> Security

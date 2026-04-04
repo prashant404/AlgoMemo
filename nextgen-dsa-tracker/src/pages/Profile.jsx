@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import { User, Settings, BarChart3, Target, Zap, Award, Save, Lock, ArrowLeft, ShieldAlert, LogOut, CheckCircle2 } from "lucide-react";
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer, Pie, PieChart, Cell, Tooltip } from "recharts";
-import { ActivityCalendar } from "react-activity-calendar"; // ⚡ FIXED: Added curly braces for v3 compatibility
+import { ActivityCalendar } from "react-activity-calendar";
 import { subDays, format } from "date-fns";
 
 import api from "../api/axios";
@@ -52,9 +52,9 @@ export default function Profile() {
       const notes = notesRes.data;
       setGameStats(statsRes.data);
 
-      // --- ⚡ HEATMAP LOGIC START ---
       const activityMap = {};
       notes.forEach(note => {
+        // ⚡ FIX: Use split('T') to get YYYY-MM-DD
         const dateStr = note.createdAt ? note.createdAt.split('T') : new Date().toISOString().split('T');
         activityMap[dateStr] = (activityMap[dateStr] || 0) + 1;
       });
@@ -72,7 +72,6 @@ export default function Profile() {
 
         heatmap.push({ date, count, level });
       }
-      // --- ⚡ HEATMAP LOGIC END ---
 
       const radarData = Object.keys(QUESTION_BANK).map(topicId => {
         const total = QUESTION_BANK[topicId]?.length || 1;
@@ -95,7 +94,7 @@ export default function Profile() {
       });
     } catch (err) {
       console.error(err);
-      setError("Database is taking too long to respond. Please check your connection.");
+      setError("Database connection error.");
     } finally {
       setLoading(false);
     }
@@ -145,26 +144,8 @@ export default function Profile() {
   };
 
   if (loading) return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col md:flex-row p-8 gap-8 animate-in fade-in duration-300">
-      <aside className="w-full md:w-64 space-y-4 shrink-0">
-        <div className="h-4 w-24 bg-white/10 rounded mb-8 animate-pulse"></div>
-        <div className="h-12 w-full bg-white/5 rounded-xl animate-pulse"></div>
-        <div className="h-12 w-full bg-white/5 rounded-xl animate-pulse"></div>
-        <div className="h-12 w-full bg-white/5 rounded-xl animate-pulse"></div>
-      </aside>
-      <main className="flex-1 max-w-6xl w-full space-y-6">
-        <div className="h-40 w-full bg-card/40 rounded-3xl border border-white/5 animate-pulse flex items-center p-8 gap-6">
-          <div className="h-28 w-28 bg-white/10 rounded-2xl shrink-0"></div>
-          <div className="space-y-4 w-full max-w-sm">
-            <div className="h-10 w-3/4 bg-white/10 rounded-lg"></div>
-            <div className="h-6 w-1/2 bg-white/5 rounded-lg"></div>
-          </div>
-        </div>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-1 h-80 bg-card/40 rounded-3xl border border-white/5 animate-pulse"></div>
-          <div className="lg:col-span-2 h-80 bg-card/40 rounded-3xl border border-white/5 animate-pulse"></div>
-        </div>
-      </main>
+    <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="text-brand font-black animate-pulse">SYNCING NEURAL PROFILE...</div>
     </div>
   );
 
@@ -172,7 +153,6 @@ export default function Profile() {
     <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4 text-center">
       <ShieldAlert size={48} className="text-rose-500 mb-4" />
       <h2 className="text-2xl font-bold mb-2">Connection Timeout</h2>
-      <p className="text-muted-foreground mb-6 max-w-sm">{error}</p>
       <button onClick={() => window.location.reload()} className="px-6 py-2 bg-brand text-white rounded-xl font-bold">Retry</button>
     </div>
   );
@@ -204,11 +184,8 @@ export default function Profile() {
       <main className="flex-1 p-8 overflow-y-auto">
         <div className="max-w-6xl mx-auto">
 
-          {/* OVERVIEW TAB */}
           {activeTab === "overview" && (
             <div className="space-y-6 animate-in fade-in duration-500">
-              
-              {/* 1. TOP HEADER */}
               <div className="relative overflow-hidden flex flex-col md:flex-row items-center gap-8 p-10 rounded-3xl border border-white/5 bg-card/40 backdrop-blur-xl shadow-2xl">
                 <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-brand/10 blur-[100px]"></div>
                 <div className="relative shrink-0">
@@ -227,10 +204,7 @@ export default function Profile() {
                 </div>
               </div>
 
-              {/* 2. MIDDLE GRID (Stats + Heatmap) */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                
-                {/* Total Solved Card */}
                 <div className="lg:col-span-1 p-8 rounded-3xl border border-white/5 bg-card/40 shadow-xl flex flex-col justify-between">
                   <div>
                     <p className="text-xs font-black text-muted-foreground uppercase tracking-widest mb-1">Solved Total</p>
@@ -246,7 +220,6 @@ export default function Profile() {
                   </div>
                 </div>
 
-                {/* ⚡ Neural Activity Heatmap */}
                 <div className="lg:col-span-2 p-8 rounded-3xl border border-white/5 bg-card/40 shadow-xl overflow-x-auto flex flex-col justify-between">
                   <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
                     <Zap size={20} className="text-brand" /> Neural Activity Sync
@@ -261,10 +234,8 @@ export default function Profile() {
                     />
                   </div>
                 </div>
-
               </div>
 
-              {/* 3. BOTTOM SECTION (Achievements) */}
               <div className="rounded-3xl border border-white/5 bg-card/40 shadow-xl overflow-hidden">
                 <div className="p-8 border-b border-white/5 bg-white/5 flex items-center gap-2">
                   <Award size={20} className="text-brand" />
@@ -278,12 +249,10 @@ export default function Profile() {
             </div>
           )}
 
-          {/* ANALYTICS TAB */}
           {activeTab === "analytics" && (
             <div className="space-y-8 animate-in fade-in duration-300">
               <h1 className="text-3xl font-bold mb-6">Progress & Analytics</h1>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                
                 <div className="p-8 rounded-3xl border border-white/5 bg-card/40 shadow-xl">
                   <h2 className="text-xl font-bold mb-6 flex items-center gap-2"><Target size={20} className="text-brand" /> Mastery Radar</h2>
                   <div className="h-[350px] w-full">
@@ -316,12 +285,10 @@ export default function Profile() {
                     </div>
                   </div>
                 </div>
-
               </div>
             </div>
           )}
 
-          {/* SETTINGS TAB */}
           {activeTab === "settings" && (
             <div className="max-w-2xl space-y-8 animate-in fade-in duration-300">
               <h1 className="text-3xl font-bold mb-6">Account Settings</h1>
@@ -338,19 +305,13 @@ export default function Profile() {
                   <User size={20} className="text-brand" /> Profile Identity
                 </h2>
                 <form onSubmit={handleUpdateIdentity} className="space-y-6">
-                  
                   <div className="flex items-center gap-6">
                     <div className="h-20 w-20 rounded-2xl bg-slate-800 border-2 border-white/10 overflow-hidden shadow-xl shrink-0">
-                      <img
-                        src={identityForm.avatar || AVATAR_OPTIONS.url}
-                        alt="Preview"
-                        className="h-full w-full object-cover"
-                        onError={(e) => { e.target.src = AVATAR_OPTIONS.url; }}
-                      />
+                      <img src={identityForm.avatar} alt="Preview" className="h-full w-full object-cover" />
                     </div>
                     <div>
                       <p className="text-sm font-bold text-foreground">Avatar Preview</p>
-                      <p className="text-xs text-muted-foreground mt-1">Click any avatar below to select it</p>
+                      <p className="text-xs text-muted-foreground mt-1">Select your neural representation</p>
                     </div>
                   </div>
 
@@ -358,26 +319,9 @@ export default function Profile() {
                     <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Choose Avatar</label>
                     <div className="grid grid-cols-4 gap-3">
                       {AVATAR_OPTIONS.map((av) => (
-                        <button
-                          key={av.name}
-                          type="button"
-                          onClick={() => setIdentityForm({ ...identityForm, avatar: av.url })}
-                          className={`relative p-1.5 rounded-xl border-2 transition-all hover:scale-105 ${
-                            identityForm.avatar === av.url
-                              ? 'border-brand shadow-lg shadow-brand/30 scale-105'
-                              : 'border-white/10 hover:border-white/30'
-                          }`}
-                        >
-                          <img
-                            src={av.url}
-                            alt={av.name}
-                            className="h-14 w-14 rounded-lg bg-slate-800 object-cover"
-                          />
-                          {identityForm.avatar === av.url && (
-                            <div className="absolute -top-1.5 -right-1.5 h-5 w-5 bg-brand rounded-full flex items-center justify-center shadow-lg">
-                              <CheckCircle2 size={12} className="text-white" />
-                            </div>
-                          )}
+                        <button key={av.name} type="button" onClick={() => setIdentityForm({ ...identityForm, avatar: av.url })}
+                          className={`relative p-1.5 rounded-xl border-2 transition-all ${identityForm.avatar === av.url ? 'border-brand scale-105' : 'border-white/10 hover:border-white/30'}`}>
+                          <img src={av.url} alt={av.name} className="h-14 w-14 rounded-lg bg-slate-800 object-cover" />
                         </button>
                       ))}
                     </div>
@@ -385,16 +329,11 @@ export default function Profile() {
 
                   <div className="space-y-2">
                     <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Username</label>
-                    <input
-                      type="text"
-                      value={identityForm.username}
-                      onChange={(e) => setIdentityForm({ ...identityForm, username: e.target.value })}
-                      className="w-full rounded-xl border border-border bg-background/50 px-4 py-3 text-sm text-foreground focus:border-brand outline-none transition-all"
-                      required
-                    />
+                    <input type="text" value={identityForm.username} onChange={(e) => setIdentityForm({ ...identityForm, username: e.target.value })}
+                      className="w-full rounded-xl border border-border bg-background/50 px-4 py-3 text-sm text-foreground focus:border-brand outline-none transition-all" required />
                   </div>
 
-                  <button type="submit" disabled={identityLoading} className="flex items-center gap-2 px-6 py-3 bg-brand text-white rounded-xl font-bold hover:opacity-90 transition-all shadow-lg shadow-brand/20 disabled:opacity-50">
+                  <button type="submit" disabled={identityLoading} className="flex items-center gap-2 px-6 py-3 bg-brand text-white rounded-xl font-bold hover:opacity-90 disabled:opacity-50 transition-all">
                     <Save size={18} /> {identityLoading ? "Saving..." : "Save Identity"}
                   </button>
                 </form>
@@ -407,25 +346,15 @@ export default function Profile() {
                 <form onSubmit={handleUpdatePassword} className="space-y-4">
                   <div className="space-y-2">
                     <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Current Password</label>
-                    <input
-                      type="password"
-                      value={passwordForm.currentPassword}
-                      onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
-                      className="w-full rounded-xl border border-border bg-background/50 px-4 py-3 text-sm text-foreground focus:border-brand outline-none"
-                      required
-                    />
+                    <input type="password" value={passwordForm.currentPassword} onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
+                      className="w-full rounded-xl border border-border bg-background/50 px-4 py-3 text-sm text-foreground focus:border-brand outline-none" required />
                   </div>
                   <div className="space-y-2">
                     <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest">New Password</label>
-                    <input
-                      type="password"
-                      value={passwordForm.newPassword}
-                      onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
-                      className="w-full rounded-xl border border-border bg-background/50 px-4 py-3 text-sm text-foreground focus:border-brand outline-none"
-                      required
-                    />
+                    <input type="password" value={passwordForm.newPassword} onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                      className="w-full rounded-xl border border-border bg-background/50 px-4 py-3 text-sm text-foreground focus:border-brand outline-none" required />
                   </div>
-                  <button type="submit" disabled={passwordLoading} className="flex items-center gap-2 px-6 py-3 bg-brand text-white rounded-xl font-bold hover:opacity-90 transition-all disabled:opacity-50">
+                  <button type="submit" disabled={passwordLoading} className="flex items-center gap-2 px-6 py-3 bg-brand text-white rounded-xl font-bold hover:opacity-90 disabled:opacity-50 transition-all">
                     <Save size={18} /> {passwordLoading ? "Updating..." : "Update Password"}
                   </button>
                 </form>

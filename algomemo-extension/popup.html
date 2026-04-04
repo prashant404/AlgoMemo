@@ -3,54 +3,161 @@
 <head>
   <meta charset="UTF-8">
   <style>
-    body { width: 320px; padding: 16px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0f172a; color: white; margin: 0; }
-    h2 { margin-top: 0; font-size: 18px; display: flex; align-items: center; gap: 8px; color: #a5b4fc; }
-    input, select, textarea { width: 100%; box-sizing: border-box; margin-bottom: 12px; padding: 10px; background: #1e293b; color: white; border: 1px solid #334155; border-radius: 8px; font-size: 14px; outline: none; }
+    * { box-sizing: border-box; }
+    body { 
+      width: 340px; 
+      padding: 20px; 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+      background: #0f172a; 
+      color: white; 
+      margin: 0; 
+    }
+    h2 { 
+      margin-top: 0; 
+      font-size: 18px; 
+      display: flex; 
+      align-items: center; 
+      gap: 8px; 
+      color: #a5b4fc; 
+      margin-bottom: 16px;
+    }
+    input, select, textarea { 
+      width: 100%; 
+      margin-bottom: 12px; 
+      padding: 10px 12px; 
+      background: #1e293b; 
+      color: white; 
+      border: 1px solid #334155; 
+      border-radius: 8px; 
+      font-size: 13px; 
+      outline: none;
+      font-family: inherit;
+    }
     input:focus, select:focus, textarea:focus { border-color: #6366f1; }
-    button { width: 100%; padding: 12px; background: #6366f1; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px; transition: 0.2s; }
+    input[readonly] { color: #94a3b8; cursor: default; }
+    button { 
+      width: 100%; 
+      padding: 12px; 
+      background: #6366f1; 
+      color: white; 
+      border: none; 
+      border-radius: 8px; 
+      cursor: pointer; 
+      font-weight: bold; 
+      font-size: 14px; 
+      transition: 0.2s;
+      font-family: inherit;
+    }
     button:hover { background: #4f46e5; }
+    button:disabled { background: #334155; cursor: not-allowed; }
     .hidden { display: none !important; }
-    .label { font-size: 11px; font-weight: bold; color: #94a3b8; text-transform: uppercase; margin-bottom: 4px; display: block; letter-spacing: 1px; }
+    .label { 
+      font-size: 10px; 
+      font-weight: bold; 
+      color: #94a3b8; 
+      text-transform: uppercase; 
+      margin-bottom: 4px; 
+      display: block; 
+      letter-spacing: 1px; 
+    }
+    .row { display: flex; gap: 10px; }
+    .row > div { flex: 1; }
+    #status { 
+      font-size: 12px; 
+      text-align: center; 
+      margin-top: 10px;
+      margin-bottom: 0; 
+      font-weight: bold; 
+      min-height: 18px;
+    }
+    .hint {
+      font-size: 11px;
+      color: #64748b;
+      margin-top: -8px;
+      margin-bottom: 12px;
+      line-height: 1.5;
+    }
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 99px;
+      font-size: 11px;
+      font-weight: bold;
+      margin-bottom: 12px;
+    }
+    .tag-easy { background: #052e16; color: #4ade80; }
+    .tag-medium { background: #431407; color: #fb923c; }
+    .tag-hard { background: #3b0764; color: #e879f9; }
   </style>
 </head>
 <body>
   <h2>🧠 AlgoMemo Sync</h2>
 
+  <!-- Settings View — shown when no token saved -->
   <div id="settingsView" class="hidden">
     <label class="label">AlgoMemo JWT Token</label>
     <input type="password" id="tokenInput" placeholder="Paste your token here...">
-    <p style="font-size: 11px; color: #64748b; margin-top: -6px; margin-bottom: 12px;">Grab this from your browser's LocalStorage on your live app.</p>
-    <button id="saveTokenBtn">Link Account</button>
+    <p class="hint">
+      Open AlgoMemo → F12 → Application → Local Storage → copy the <strong>token</strong> value.
+    </p>
+    <button id="saveTokenBtn">🔗 Link My Account</button>
   </div>
 
+  <!-- Main View — shown after token saved -->
   <div id="mainView" class="hidden">
     <label class="label">Problem Title</label>
-    <input type="text" id="title" readonly>
+    <input type="text" id="title" readonly placeholder="Detecting...">
 
-    <div style="display: flex; gap: 10px;">
-      <div style="flex: 1;">
+    <div class="row">
+      <div>
         <label class="label">Difficulty</label>
-        <input type="text" id="difficulty" readonly>
+        <input type="text" id="difficulty" readonly placeholder="Detecting...">
       </div>
-      <div style="flex: 1;">
+      <div>
         <label class="label">Topic</label>
         <select id="topic">
-          <option value="arrays">Arrays</option>
+          <option value="arrays">Arrays & Hashing</option>
           <option value="two-pointers">Two Pointers</option>
           <option value="sliding-window">Sliding Window</option>
+          <option value="stack">Stack</option>
           <option value="binary-search">Binary Search</option>
+          <option value="linked-list">Linked List</option>
           <option value="trees">Trees</option>
-          <option value="dynamic-programming">DP</option>
+          <option value="tries">Tries</option>
           <option value="graphs">Graphs</option>
+          <option value="advanced-graphs">Advanced Graphs</option>
+          <option value="dp">Dynamic Prog</option>
+          <option value="heap">Heap / Priority Queue</option>
+          <option value="backtracking">Backtracking</option>
+          <option value="intervals">Intervals</option>
+          <option value="greedy">Greedy</option>
+          <option value="bit-manipulation">Bit Manipulation</option>
+          <option value="math">Math & Geometry</option>
+          <option value="recursion">Recursion</option>
+          <option value="sorting">Sorting & Searching</option>
+          <option value="strings">String Manipulation</option>
+          <option value="design">Design / OOP</option>
         </select>
       </div>
     </div>
 
-    <label class="label">The Trick (Micro-Journal)</label>
-    <textarea id="trick" rows="3" placeholder="What was the key intuition to solve this?"></textarea>
+    <label class="label">Confidence</label>
+    <select id="confidence">
+      <option value="Hard">😅 Struggled</option>
+      <option value="Medium" selected>😐 Alright</option>
+      <option value="Easy">💪 Crushed it</option>
+    </select>
 
-    <button id="syncBtn">Send to Base 🚀</button>
-    <p id="status" style="font-size: 12px; text-align: center; margin-bottom: 0; font-weight: bold;"></p>
+    <label class="label">The Trick (Core Intuition)</label>
+    <textarea id="trick" rows="3" placeholder="What was the key insight to solve this?"></textarea>
+
+    <button id="syncBtn">Send to AlgoMemo 🚀</button>
+    <p id="status"></p>
+    
+    <p style="font-size: 10px; color: #475569; text-align: center; margin-top: 8px; margin-bottom: 0;">
+      <span id="accountInfo"></span> · 
+      <span id="logoutBtn" style="cursor: pointer; color: #6366f1;">Switch Account</span>
+    </p>
   </div>
 
   <script src="popup.js"></script>

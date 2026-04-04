@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { X, Lightbulb, Zap, Save, Trash2, AlertTriangle, Clock, Box } from "lucide-react";
 import api from "../api/axios";
+import SimilarProblems from "./SimilarProblems"; // ⚡ IMPORTED THE NEW COMPONENT
 
 export default function NoteModal({
   isOpen,
@@ -203,6 +204,17 @@ export default function NoteModal({
                 </button>
               </div>
             </form>
+
+            {/* ⚡ PLUGGED IN SIMILAR PROBLEMS COMPONENT ⚡ */}
+            {/* We only show this if they are editing an existing note (not adding a brand new one) */}
+            {existingNote && (
+              <SimilarProblems 
+                key={questionId} 
+                currentTopic={topic} 
+                currentProblemId={questionId} 
+              />
+            )}
+            
           </>
         )}
       </div>

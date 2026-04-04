@@ -13,8 +13,9 @@ export default function WeaknessDetector({ notes }) {
         topicStats[note.topic] = { total: 0, struggles: 0 };
       }
       topicStats[note.topic].total += 1;
-      
-      if (note.difficulty === 'Hard') {
+
+      // ✅ Fixed — use 'confidence' not 'difficulty'
+      if (note.confidence === 'Hard') {
         topicStats[note.topic].struggles += 1;
       }
     });
@@ -22,8 +23,11 @@ export default function WeaknessDetector({ notes }) {
     const detected = [];
     for (const [topic, stats] of Object.entries(topicStats)) {
       if (stats.total >= 2 && (stats.struggles / stats.total) >= 0.5) {
-        const formattedTopic = topic.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-        detected.push(formattedTopic);
+        const formattedTopic = topic
+          .split('-')
+          .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+          .join(' ');
+        detected.push({ topic, formattedTopic });
       }
     }
 
@@ -46,23 +50,26 @@ export default function WeaknessDetector({ notes }) {
               <span className="relative inline-flex rounded-full h-3 w-3 bg-rose-500"></span>
             </span>
           </h3>
-
-          {/* ✅ Fixed — escaped > symbol */}
           <p className="text-sm text-rose-300/80 mt-1 mb-4 font-medium">
-            Our telemetry indicates a high struggle rate (&gt;50%) with the following patterns. We recommend immediate review.
+            High struggle rate (&gt;50%) detected in the following topics. Immediate review recommended.
           </p>
-          
+
           <div className="flex flex-wrap gap-2 mb-4">
-            {weaknesses.map(w => (
-              <span key={w} className="px-3 py-1 bg-rose-500/20 border border-rose-500/30 rounded-lg text-rose-300 text-sm font-bold flex items-center gap-2">
-                <Activity size={14} /> {w}
-              </span>
+            {weaknesses.map(({ topic, formattedTopic }) => (
+              // ✅ Each tag links directly to that topic
+              <Link
+                to={`/topic/${topic}`}
+                key={topic}
+                className="px-3 py-1 bg-rose-500/20 border border-rose-500/30 rounded-lg text-rose-300 text-sm font-bold flex items-center gap-2 hover:bg-rose-500/30 transition-colors"
+              >
+                <Activity size={14} /> {formattedTopic}
+              </Link>
             ))}
           </div>
 
-          <Link to="/gauntlet" className="inline-flex items-center gap-2 text-sm font-bold text-white bg-rose-500 hover:bg-rose-600 px-4 py-2 rounded-xl transition-colors">
-            Run Focused Gauntlet <ChevronRight size={16} />
-          </Link>
+          <p className="text-xs text-rose-400/60 font-medium">
+            💡 Click a topic above to go practice it directly
+          </p>
         </div>
       </div>
     </div>

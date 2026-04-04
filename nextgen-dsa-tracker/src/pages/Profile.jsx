@@ -32,7 +32,7 @@ export default function Profile() {
   const [stats, setStats] = useState({ radar: [], pie: [], total: 0, easy: 0, med: 0, hard: 0 });
   const [gameStats, setGameStats] = useState({ level: 1, title: "Pattern Solver", badges: [], solvedCount: 0 });
 
-  const [identityForm, setIdentityForm] = useState({ username: user?.username || "", avatar: user?.avatar || AVATAR_OPTIONS[0].url });
+  const [identityForm, setIdentityForm] = useState({ username: user?.username || "", avatar: user?.avatar || AVATAR_OPTIONS.url });
   const [passwordForm, setPasswordForm] = useState({ currentPassword: "", newPassword: "" });
   const [settingsMsg, setSettingsMsg] = useState({ type: "", text: "" });
   const [identityLoading, setIdentityLoading] = useState(false);
@@ -228,11 +228,13 @@ export default function Profile() {
             <div className="space-y-8 animate-in fade-in duration-300">
               <h1 className="text-3xl font-bold mb-6">Progress & Analytics</h1>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                
+                {/* ⚡ RADAR CHART FIX */}
                 <div className="p-8 rounded-3xl border border-white/5 bg-card/40 shadow-xl">
                   <h2 className="text-xl font-bold mb-6 flex items-center gap-2"><Target size={20} className="text-brand" /> Mastery Radar</h2>
                   <div className="h-[350px] w-full">
                     <ResponsiveContainer width="100%" height="100%">
-                      <RadarChart cx="50%" cy="50%" outerRadius="60%" data={stats.radar} margin={{ top: 10, right: 30, bottom: 10, left: 30 }}>
+                      <RadarChart cx="50%" cy="50%" outerRadius="50%" data={stats.radar} margin={{ top: 20, right: 40, bottom: 20, left: 40 }}>
                         <PolarGrid stroke="#334155" />
                         <PolarAngleAxis dataKey="subject" tick={{ fill: "#94a3b8", fontSize: 10, fontWeight: "bold" }} />
                         <Radar name="Mastery" dataKey="score" stroke="#6366f1" fill="#6366f1" fillOpacity={0.5} />
@@ -241,12 +243,14 @@ export default function Profile() {
                     </ResponsiveContainer>
                   </div>
                 </div>
+
+                {/* ⚡ PIE CHART FIX */}
                 <div className="p-8 rounded-3xl border border-white/5 bg-card/40 shadow-xl">
                   <h2 className="text-xl font-bold mb-6 flex items-center gap-2"><Zap size={20} className="text-amber-400" /> Confidence Mix</h2>
                   <div className="h-[350px] flex flex-col items-center justify-center">
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
-                        <Pie data={stats.pie} innerRadius={70} outerRadius={100} paddingAngle={8} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
+                        <Pie data={stats.pie} innerRadius={60} outerRadius={80} paddingAngle={8} dataKey="value" stroke="none">
                           {stats.pie.map((e, i) => <Cell key={`cell-${i}`} fill={COLORS[i % COLORS.length]} stroke="none" />)}
                         </Pie>
                         <Tooltip contentStyle={{ backgroundColor: "#0f172a", borderRadius: "12px", border: "none" }} />
@@ -259,6 +263,7 @@ export default function Profile() {
                     </div>
                   </div>
                 </div>
+
               </div>
             </div>
           )}
@@ -286,10 +291,10 @@ export default function Profile() {
                   <div className="flex items-center gap-6">
                     <div className="h-20 w-20 rounded-2xl bg-slate-800 border-2 border-white/10 overflow-hidden shadow-xl shrink-0">
                       <img
-                        src={identityForm.avatar || AVATAR_OPTIONS[0].url}
+                        src={identityForm.avatar || AVATAR_OPTIONS.url}
                         alt="Preview"
                         className="h-full w-full object-cover"
-                        onError={(e) => { e.target.src = AVATAR_OPTIONS[0].url; }}
+                        onError={(e) => { e.target.src = AVATAR_OPTIONS.url; }}
                       />
                     </div>
                     <div>
